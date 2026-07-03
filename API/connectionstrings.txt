@@ -1,0 +1,16 @@
+
+
+Nashik - A003
+
+"BaseUrl": "http://10.3.48.39:2443/PQBLT",
+"ReportURL": "http://mmnsk1drsv/DronaRep/reportserver?/PQ Dashboard/BLT/BLTReport&rs:Command=Render&rs:Format=PDF&Concern_ID="
+
+"DefaultConnection": "Server=10.3.48.51;Database=PQ_Task_Managemenet;User Id=DRONAADMIN;Password=admin#123;Integrated Security=False;Trusted_Connection=false;MultipleActiveResultSets=true;TrustServerCertificate=True",
+
+
+ Chakan - CK01
+
+ "BaseUrl": "http://10.192.68.77:2443/PQBLT",
+  "ReportURL": "http://mvml-drnrs/DronaRep/reportserver?/PQ Dashboard/BLT/BLTReport&rs:Command=Render&rs:Format=PDF&Concern_ID="
+
+ "DefaultConnection": "Server=10.192.68.78;Database=PQ_Task_Managemenet;User Id=DRONAADMIN;Password=admin#123;Integrated Security=False;Trusted_Connection=false;MultipleActiveResultSets=true;TrustServerCertificate=True"

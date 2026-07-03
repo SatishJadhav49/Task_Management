@@ -1,0 +1,37 @@
+<!-- Authentication Pages (Full Screen) -->
+@if (!showMainLayout) {
+  <div>
+    <router-outlet></router-outlet>
+  </div>
+}
+@if (showMainLayout) {
+  <div class="flex h-screen bg-gray-50 overflow-hidden">
+    <!-- Sidebar -->
+    <app-sidebar
+      [isOpen]="isSidebarOpen"
+      (closeSidebar)="isSidebarOpen = false"
+    ></app-sidebar>
+
+    <!-- Mobile overlay -->
+    @if (isSidebarOpen) {
+      <div
+        class="fixed inset-0 bg-black/40 z-20 lg:hidden"
+        (click)="isSidebarOpen = false"
+      ></div>
+    }
+
+    <!-- Main content area -->
+    <div class="flex flex-col flex-1 min-w-0">
+      <!-- Topbar -->
+      <app-topbar (toggleSidebar)="toggleSidebar()"></app-topbar>
+
+      <!-- Page content -->
+      <main class="flex-1 overflow-y-auto p-6">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+
+  <!-- Global Toast Container - Shows on all pages -->
+  <app-toast-container></app-toast-container>
+}

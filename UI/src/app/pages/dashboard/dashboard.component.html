@@ -1,0 +1,149 @@
+<!-- Page Header -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+  <p class="text-sm text-gray-500 mt-1">Welcome back, {{ Employee_Name }}! Here's what's happening.</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+  @for (stat of stats; track stat.label) {
+    <div class="bg-white rounded-xl border p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow" [class]="stat.border">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" [class]="stat.color">
+        @switch (stat.icon) {
+          @case ('total') {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          }
+          @case ('progress') {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          @case ('done') {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          @default {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          }
+        }
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+        <p class="text-sm text-gray-500">{{ stat.label }}</p>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Recent Tasks Table -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+    <h2 class="text-base font-semibold text-gray-800"> In Progress Tasks</h2>
+    <a routerLink="/my-tasks" class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">View all →</a>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="hidden sm:block overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+          <th class="px-6 py-3">Assigned To</th>
+          <th class="px-6 py-3">Task</th>
+          <th class="px-6 py-3">Priority</th>
+          <th class="px-6 py-3">Status</th>
+          <th class="px-6 py-3">Due Date</th>
+          <!-- <th class="px-6 py-3">Responsibility</th> -->
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        @for (task of recentTasks; track task.Task_ID) {
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-3.5 font-medium text-gray-800">{{ task.Responsibility }}</td>
+            <td class="px-6 py-3.5 font-medium text-gray-800">
+              <div class="flex flex-col gap-1.5">
+                <span>{{ task.Task_Description }}</span>
+                @if (hasRemark(task)) {
+                  <span
+                    class="inline-flex items-start gap-1.5 max-w-md px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-md text-xs font-medium text-amber-800"
+                    [title]="task.Manager_Remark ?? ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span class="flex flex-col">
+                      <span class="line-clamp-2">{{ task.Manager_Remark }}</span>
+                      <span class="text-[10px] font-normal text-amber-600 mt-0.5">{{ formatRemarkMeta(task) }}</span>
+                    </span>
+                  </span>
+                }
+              </div>
+            </td>
+            <td class="px-6 py-3.5">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold" [class]="priorityClass(task.Priority)">
+                {{ task.Priority }}
+              </span>
+            </td>
+            <td class="px-6 py-3.5">
+              <select
+                [ngModel]="task.Status"
+                (ngModelChange)="updateTaskStatus(task, $event)"
+                class="min-w-32 rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [class]="statusSelectClass(task.Status)">
+                @for (status of statuses; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </td>
+            <td class="px-6 py-3.5 text-gray-500">{{ formatDate(task.Due_Date) }}</td>
+            <!-- <td class="px-6 py-3.5 text-gray-500">{{ task.Responsibility }}</td> -->
+          </tr>
+        }
+        @empty {
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">No in progress tasks found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="sm:hidden divide-y divide-gray-100">
+    @for (task of recentTasks; track task.Task_ID) {
+      <div class="px-4 py-4">
+        <p class="font-medium text-gray-800 text-sm mb-1.5">{{ task.Task_Description }}</p>
+        @if (hasRemark(task)) {
+          <span class="inline-flex items-start gap-1.5 px-2 py-1 mb-2 bg-amber-50 border border-amber-200 rounded-md text-[11px] font-medium text-amber-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span class="flex flex-col">
+              <span class="line-clamp-3">{{ task.Manager_Remark }}</span>
+              <span class="text-[10px] font-normal text-amber-600 mt-0.5">{{ formatRemarkMeta(task) }}</span>
+            </span>
+          </span>
+        }
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold" [class]="priorityClass(task.Priority)">{{ task.Priority }}</span>
+          <select
+            [ngModel]="task.Status"
+            (ngModelChange)="updateTaskStatus(task, $event)"
+            class="rounded-lg border px-2.5 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class]="statusSelectClass(task.Status)">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+          <span class="text-xs text-gray-400">{{ formatDate(task.Due_Date) }}</span>
+        </div>
+      </div>
+    }
+    @empty {
+      <div class="px-4 py-10 text-center text-gray-400 text-sm">No in progress tasks found.</div>
+    }
+  </div>
+</div>
