@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { DEVELOPER_DESIGNATION_ID, LEAD_DESIGNATION_ID, MANAGER_DESIGNATION_ID, MES_EXECUTIVE_DESIGNATION_ID } from '../../app.constant';
 
 interface NavItem {
   label: string;
@@ -7,9 +8,6 @@ interface NavItem {
   icon: string;
 }
 
-const MANAGER_DESIGNATION_ID = 1;
-const LEAD_DESIGNATION_ID = 2;
-const DEVELOPER_DESIGNATION_ID = 3;
 
 @Component({
   selector: 'app-sidebar',
@@ -70,6 +68,15 @@ export class SidebarComponent {
           </svg>`
   };
 
+  // Visible to managers, team leads and developers (not executive).
+  private readonly deploymentItem: NavItem = {
+    label: 'Deployment Approval',
+    route: '/deployment-approval',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>`
+  };
+
   private readonly managerOnlyItem: NavItem = {
     label: 'User Management',
     route: '/user-management',
@@ -83,12 +90,23 @@ export class SidebarComponent {
     MANAGER_DESIGNATION_ID,
     LEAD_DESIGNATION_ID,
     DEVELOPER_DESIGNATION_ID,
+    MES_EXECUTIVE_DESIGNATION_ID
+  ];
+
+  // Deployment approval is for managers, leads and developers alike.
+  private readonly deploymentDesignationIds = [
+    MANAGER_DESIGNATION_ID,
+    LEAD_DESIGNATION_ID,
+    DEVELOPER_DESIGNATION_ID,
   ];
 
   readonly navItems: NavItem[] = [
     ...this.baseNavItems,
     ...(this.shiftDesignationIds.includes(this.designationId)
       ? [this.shiftItem]
+      : []),
+    ...(this.deploymentDesignationIds.includes(this.designationId)
+      ? [this.deploymentItem]
       : []),
     ...(this.designationId === MANAGER_DESIGNATION_ID
       ? [this.managerOnlyItem]

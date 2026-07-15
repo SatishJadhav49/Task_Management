@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { CommonService, TeamOption } from '../common.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { Shift, ShiftRosterMember, ShiftDay } from './shift.model';
-
-const MANAGER_DESIGNATION_ID = 1;
-const LEAD_DESIGNATION_ID = 2;
-const DEVELOPER_DESIGNATION_ID = 3;
+import {
+  DEVELOPER_DESIGNATION_ID,
+  LEAD_DESIGNATION_ID,
+  MANAGER_DESIGNATION_ID,
+  MES_EXECUTIVE_DESIGNATION_ID,
+} from '../../app.constant';
 
 @Component({
   selector: 'app-shift-management',
@@ -51,7 +53,8 @@ export class ShiftManagementComponent {
     if (
       designationId !== MANAGER_DESIGNATION_ID &&
       designationId !== LEAD_DESIGNATION_ID &&
-      designationId !== DEVELOPER_DESIGNATION_ID
+      designationId !== DEVELOPER_DESIGNATION_ID &&
+      designationId !== MES_EXECUTIVE_DESIGNATION_ID
     ) {
       this.router.navigate(['/no-access']);
       return;

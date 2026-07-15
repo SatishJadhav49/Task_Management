@@ -16,6 +16,8 @@ namespace Taskmanagement_API.Models
     public class SystemSettings
     {
         public string BaseUrl { get; set; } = string.Empty;
+        // Public URL of the Angular app; used to build links in notification mails.
+        public string ApplicationUrl { get; set; } = string.Empty;
     }
 }
 

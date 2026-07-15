@@ -31,5 +31,12 @@ export const routes: Routes = [
         (m) => m.ShiftManagementComponent,
       ),
   },
+  {
+    path: 'deployment-approval',
+    loadComponent: () =>
+      import('./pages/deployment-approval/deployment-approval.component').then(
+        (m) => m.DeploymentApprovalComponent,
+      ),
+  },
   { path: '**', redirectTo: 'daily-update' },
 ];

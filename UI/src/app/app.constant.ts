@@ -1,0 +1,4 @@
+export const MANAGER_DESIGNATION_ID = 1;
+export const LEAD_DESIGNATION_ID = 2;
+export const DEVELOPER_DESIGNATION_ID = 3;
+export const MES_EXECUTIVE_DESIGNATION_ID = 4;

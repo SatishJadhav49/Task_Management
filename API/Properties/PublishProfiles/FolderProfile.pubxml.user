@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>D:\Deployment\Task_Management</_PublishTargetUrl>
-    <History>True|2026-06-22T04:16:33.3631646Z||;True|2026-06-22T09:10:45.2508621+05:30||;True|2026-03-13T10:21:42.1766681+05:30||;True|2026-03-12T09:12:03.1643754+05:30||;</History>
+    <History>True|2026-07-04T02:13:13.8772480Z||;True|2026-07-03T17:59:39.7544872+05:30||;True|2026-07-03T17:51:31.6399348+05:30||;True|2026-06-22T09:46:33.3631646+05:30||;True|2026-06-22T09:10:45.2508621+05:30||;True|2026-03-13T10:21:42.1766681+05:30||;True|2026-03-12T09:12:03.1643754+05:30||;</History>
     <LastFailureDetails />
   </PropertyGroup>
 </Project>

@@ -90,7 +90,7 @@ namespace Taskmanagement_API.Data
                 CROSS JOIN (SELECT Shift_Name FROM MM_Shift_Master WHERE Shift_ID = @GeneralShiftId) gen
                 WHERE et.Team_ID = @Team_ID
                   AND (e.Is_Deleted IS NULL OR e.Is_Deleted = 0)
-                  AND e.Designation_ID IN (2, 3)
+                  AND e.Designation_ID IN (2, 3,4)
                 ORDER BY e.Employee_Name";
 
             using var connection = await _connectionFactory.CreateConnectionAsync();

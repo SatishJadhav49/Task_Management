@@ -63,8 +63,7 @@ export class DashboardComponent {
   get recentTasks(): Task_Details_List[] {
     return this.allTasks
       .filter((task) =>  task.Status === 'In Progress')
-      .sort((left, right) => left.Due_Date.localeCompare(right.Due_Date))
-      .slice(0, 5);
+      .sort((left, right) => left.Due_Date.localeCompare(right.Due_Date));
   }
 
   updateStats() {

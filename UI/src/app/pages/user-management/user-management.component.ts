@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonService, TeamOption } from '../common.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { DEVELOPER_DESIGNATION_ID, LEAD_DESIGNATION_ID, MANAGER_DESIGNATION_ID } from '../../app.constant';
 
 interface DesignationOption {
   Designation_ID: number;
@@ -38,9 +39,6 @@ interface UserForm {
   teamIds: number[];
 }
 
-const MANAGER_DESIGNATION_ID = 1;
-const LEAD_DESIGNATION_ID = 2;
-const DEVELOPER_DESIGNATION_ID = 3;
 
 @Component({
   selector: 'app-user-management',

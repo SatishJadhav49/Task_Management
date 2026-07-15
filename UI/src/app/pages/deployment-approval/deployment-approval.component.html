@@ -1,0 +1,342 @@
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Deployment Approval</h1>
+    <p class="text-sm text-gray-500 mt-1">
+      @if (isManager) {
+        Review and decide on deployment requests from your team.
+      } @else {
+        Raise deployment requests and track their approval status.
+      }
+    </p>
+  </div>
+
+  @if (canRaise) {
+    <button
+      (click)="toggleForm()"
+      class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-sm w-fit">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      New Request
+    </button>
+  }
+</div>
+
+<!-- Add Request Form -->
+@if (canRaise && showForm) {
+  <div class="bg-white rounded-xl border border-blue-200 ring-1 ring-blue-100 shadow-sm px-5 py-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-semibold text-gray-800">Raise a Deployment Request</h2>
+      <button (click)="toggleForm()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+      <!-- Feature / Module -->
+      <div class="flex flex-col gap-1 sm:col-span-2">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature / Module</label>
+        <input
+          type="text"
+          [(ngModel)]="newRequest.featureModule"
+          placeholder="e.g. Shift Management module"
+          class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+
+      <!-- Change Category -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Change Category</label>
+        <select
+          [(ngModel)]="newRequest.changeType"
+          class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+          <option value="" disabled>Select category...</option>
+          @for (type of changeTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Changes made -->
+    <div class="flex flex-col gap-1 mb-4">
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Changes Made</label>
+      <textarea
+        [(ngModel)]="newRequest.changesDescription"
+        rows="4"
+        placeholder="Describe the changes / what was implemented..."
+        class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"></textarea>
+    </div>
+
+    <!-- Risk / challenges (optional) -->
+    <div class="flex flex-col gap-1 mb-4">
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        Risk / Major Challenges <span class="text-gray-400 normal-case font-normal">(optional)</span>
+      </label>
+      <textarea
+        [(ngModel)]="newRequest.riskChallenge"
+        rows="3"
+        placeholder="Any risks, major challenges or things to watch out for..."
+        class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"></textarea>
+    </div>
+
+    <div class="flex items-center justify-end gap-2">
+      <button
+        (click)="toggleForm()"
+        class="px-4 py-2.5 text-sm font-semibold text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all">
+        Cancel
+      </button>
+      <button
+        (click)="onSubmit()"
+        [disabled]="!isFormValid() || isSaving"
+        class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        {{ isSaving ? 'Submitting...' : 'Submit Request' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Filter Tabs -->
+<div class="flex items-center gap-4 flex-wrap mb-5">
+  <div class="flex items-center gap-3 flex-wrap">
+    <span class="text-sm font-semibold text-gray-600">Status</span>
+    <div class="flex items-center gap-1 flex-wrap bg-white border border-gray-200 rounded-xl p-1 w-fit shadow-sm">
+      @for (status of statusFilters; track status) {
+        <button
+          (click)="setStatusFilter(status)"
+          [class]="activeStatusFilter === status
+            ? 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow-sm transition-all'
+            : 'px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all'">
+          {{ status }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isManager && pendingCount > 0) {
+    <div class="h-7 w-px bg-gray-200 hidden lg:block"></div>
+    <span class="text-sm font-semibold text-amber-600">{{ pendingCount }} awaiting your decision</span>
+  }
+</div>
+
+<!-- Requests Table -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
+          <th class="w-8 px-3 py-3"></th>
+          <th class="px-6 py-3">Requester</th>
+          <th class="px-6 py-3">Request Date</th>
+          <th class="px-6 py-3">Feature / Module</th>
+          <th class="px-6 py-3">Description</th>
+          <th class="px-6 py-3">Category</th>
+          <th class="px-6 py-3">Status</th>
+          <th class="px-6 py-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        @if (isLoading) {
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">Loading requests...</td>
+          </tr>
+        } @else {
+          @for (req of filteredRequests; track req.Request_ID) {
+            <tr
+              (click)="toggleExpand(req.Request_ID)"
+              class="hover:bg-gray-50 transition-colors cursor-pointer">
+              <td class="px-3 py-4 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform"
+                  [class.rotate-90]="expandedId === req.Request_ID"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-medium text-gray-800">{{ req.Requested_By_Name }}</div>
+                @if (req.Requested_By_Designation) {
+                  <div class="text-xs text-gray-400">{{ req.Requested_By_Designation }}</div>
+                }
+              </td>
+              <td class="px-6 py-4 text-gray-500 whitespace-nowrap">{{ formatDate(req.Requested_Date) }}</td>
+              <td class="px-6 py-4 font-medium text-gray-800">{{ req.Feature_Module }}</td>
+              <td class="px-6 py-4 text-gray-500 max-w-xs">
+                <span class="line-clamp-2">{{ req.Changes_Description }}</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ changeTypeBadgeClass(req.Change_Type) }}">
+                  {{ req.Change_Type }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ statusBadgeClass(req.Status) }}">
+                  {{ req.Status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right whitespace-nowrap" (click)="$event.stopPropagation()">
+                @if (isManager && req.Status === 'Pending') {
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      (click)="approve(req)"
+                      [disabled]="isDeciding"
+                      class="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-40 transition-colors">
+                      Approve
+                    </button>
+                    <button
+                      (click)="openRejectModal(req)"
+                      [disabled]="isDeciding"
+                      class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-40 transition-colors">
+                      Reject
+                    </button>
+                  </div>
+                } @else if (canRaise && req.Requested_By === userId && req.Status === 'Pending') {
+                  <button
+                    (click)="withdraw(req)"
+                    class="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                    Withdraw
+                  </button>
+                } @else {
+                  <span class="text-gray-300">—</span>
+                }
+              </td>
+            </tr>
+
+            <!-- Expanded details -->
+            @if (expandedId === req.Request_ID) {
+              <tr class="bg-gray-50">
+                <td></td>
+                <td colspan="7" class="px-6 py-4">
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
+
+                    <!-- Changes made -->
+                    <div class="bg-white border border-blue-100 rounded-lg px-3 py-2.5">
+                      <p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">Changes Made</p>
+                      <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ req.Changes_Description }}</p>
+                    </div>
+
+                    <!-- Risk / challenges -->
+                    @if (req.Risk_Challenge) {
+                      <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                        <p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Risk / Major Challenges</p>
+                        <p class="text-sm text-amber-900 whitespace-pre-wrap">{{ req.Risk_Challenge }}</p>
+                      </div>
+                    }
+
+                    <!-- Decision -->
+                    @if (req.Status === 'Pending') {
+                      <div class="bg-white border border-gray-200 rounded-lg px-3 py-2.5">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Approval Status</p>
+                        <p class="text-sm text-gray-700">
+                          Awaiting decision from
+                          <span class="font-semibold text-gray-900">{{ req.Approver_Manager_Name || 'assigned manager' }}</span>
+                        </p>
+                      </div>
+                    } @else {
+                      <div
+                        class="border rounded-lg px-3 py-2.5"
+                        [class]="req.Status === 'Approved'
+                          ? 'bg-green-50 border-green-200'
+                          : 'bg-red-50 border-red-200'">
+                        <p class="text-xs font-bold uppercase tracking-wide mb-1"
+                          [class]="req.Status === 'Approved' ? 'text-green-700' : 'text-red-700'">
+                          {{ req.Status }} by {{ req.Approved_By_Name || '—' }}
+                          @if (req.Approved_Date) { · {{ formatDateTime(req.Approved_Date) }} }
+                        </p>
+                        @if (req.Manager_Remark) {
+                          <p class="text-sm whitespace-pre-wrap"
+                            [class]="req.Status === 'Approved' ? 'text-green-900' : 'text-red-900'">
+                            {{ req.Manager_Remark }}
+                          </p>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+          @empty {
+            <tr>
+              <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">No requests found for this filter.</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+@if (rejectModalOpen && rejectTarget) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <!-- backdrop -->
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" (click)="closeRejectModal()"></div>
+
+    <!-- dialog -->
+    <div class="relative bg-white w-full max-w-lg rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-red-100 text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19H19a2 2 0 001.75-2.96l-6.93-12a2 2 0 00-3.5 0l-6.93 12A2 2 0 005.07 19z" />
+            </svg>
+          </span>
+          <div>
+            <h3 class="text-base font-semibold text-gray-900">Reject Request</h3>
+            <p class="text-xs text-gray-500 mt-0.5">Remark visible to {{ rejectTarget.Requested_By_Name }}</p>
+          </div>
+        </div>
+        <button
+          (click)="closeRejectModal()"
+          [disabled]="isDeciding"
+          class="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-40">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-5 py-4">
+        <!-- request summary -->
+        <div class="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5 mb-4">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Request</p>
+          <p class="text-sm text-gray-800">{{ rejectTarget.Feature_Module }}</p>
+        </div>
+
+        <!-- textarea -->
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Reason for Rejection</label>
+        <textarea
+          [(ngModel)]="rejectRemark"
+          rows="5"
+          [maxlength]="remarkMaxLength"
+          placeholder="Explain why this deployment is rejected..."
+          class="mt-1 w-full text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"></textarea>
+        <div class="flex items-center justify-end mt-1">
+          <p class="text-xs text-gray-400">{{ rejectRemark.length }} / {{ remarkMaxLength }}</p>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          (click)="closeRejectModal()"
+          [disabled]="isDeciding"
+          class="px-4 py-2 text-sm font-semibold text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="confirmReject()"
+          [disabled]="isDeciding || !rejectRemark.trim()"
+          class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm">
+          {{ isDeciding ? 'Rejecting...' : 'Reject Request' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

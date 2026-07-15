@@ -364,4 +364,50 @@ export class CommonService {
       payload,
     );
   }
+
+  // ── Deployment Approval ───────────────────────────────────────
+  getDeploymentRequests(employeeId: number, mode?: string): Observable<any[]> {
+    const viewMode = mode ?? this.getCurrentTaskViewMode();
+    return this.apiRequest.get(
+      `MM_Deployment/GetRequestsByEmployee?employeeId=${employeeId}&mode=${viewMode}`,
+    );
+  }
+
+  createDeploymentRequest(payload: {
+    Feature_Module: string;
+    Changes_Description: string;
+    Risk_Challenge: string | null;
+    Change_Type: string;
+    Requested_By: number;
+    Plant_Code: string;
+    Inserted_Host: string;
+    Inserted_User_ID: number;
+  }): Observable<any> {
+    return this.apiRequest.post('MM_Deployment/CreateRequest', payload);
+  }
+
+  updateDeploymentDecision(
+    requestId: number,
+    payload: {
+      Status: string;
+      Manager_Remark: string | null;
+      Updated_User_ID: number;
+      Updated_Host: string;
+    },
+  ): Observable<any> {
+    return this.apiRequest.post(
+      `MM_Deployment/UpdateDecision/${requestId}`,
+      payload,
+    );
+  }
+
+  deleteDeploymentRequest(
+    requestId: number,
+    employeeId: number,
+  ): Observable<any> {
+    return this.apiRequest.delete(
+      `MM_Deployment/DeleteRequest/${requestId}?employeeId=${employeeId}`,
+      {},
+    );
+  }
 }

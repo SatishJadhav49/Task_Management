@@ -30,6 +30,9 @@ builder.Services.AddScoped<MM_ActivityDetailsService>();
 builder.Services.AddScoped<MM_TaskDetailsService>();
 builder.Services.AddScoped<MM_Daily_StatusDataService>();
 builder.Services.AddScoped<MM_ShiftDataService>();
+builder.Services.AddScoped<MM_DeploymentDataService>();
+builder.Services.AddScoped<MM_DeploymentNotificationService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Register Utils Services
 builder.Services.AddSingleton<IApiResponseHelper, ApiResponseHelper>();
