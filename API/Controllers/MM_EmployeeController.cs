@@ -192,7 +192,7 @@ namespace Taskmanagement_API.Controllers
             try
             {
                 EncryptDecrypt encDecobj = new EncryptDecrypt();
-                //  var userno = encDecobj.DecryptString(id);
+                //   var userno = encDecobj.DecryptString(id);
                 var userno = "50005817";
                 var userCred = await _EmployeeService.GetUserAuthenticationAsync(userno, plantid, Audit_Type_Id);
 
@@ -217,10 +217,10 @@ namespace Taskmanagement_API.Controllers
             try
             {
                 EncryptDecrypt encDecobj = new EncryptDecrypt();
-                //  var decrypt = encDecobj.DecryptString(id);
+                //   var decrypt = encDecobj.DecryptString(id);
                 var decrypt = "50005817";
 
-                var empObj = await _EmployeeService.GetEmployeeDetailsAsync(0, decrypt);
+                var empObj = await _EmployeeService.GetEmployeeDetailsAsync(1, decrypt);
 
                 if (empObj == null)
                 {

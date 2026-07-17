@@ -30,6 +30,7 @@ namespace Taskmanagement_API.Data
         private sealed class RequestMailData
         {
             public decimal Request_ID;
+            public decimal Requested_By;
             public string Feature_Module = string.Empty;
             public string Changes_Description = string.Empty;
             public string? Risk_Challenge;
@@ -70,9 +71,15 @@ namespace Taskmanagement_API.Data
                 contentHtml: intro + BuildDetailsTable(data) + BuildCta("Review &amp; Approve"),
                 note: "You can approve or reject this request from the Deployment Approval section in TaskFlow.");
 
+            // CC: every developer & team lead of the requester's team (includes the
+            // requester & their lead). No other managers. To: the approving manager.
+            var cc = await GetTeamRecipientEmailsAsync(data.Requested_By);
+            cc.Add(data.Requester_Email);
+            cc.Add(data.Lead_Email);
+
             _emailService.SendInBackground(
                 to: new List<string> { data.Manager_Email },
-                cc: new List<string> { data.Lead_Email, data.Requester_Email },
+                cc: cc,
                 subject: subject,
                 htmlBody: body);
         }
@@ -113,15 +120,21 @@ namespace Taskmanagement_API.Data
                 </table>";
 
             var body = BuildMailShell(
-                bannerHtml: BuildBanner(color, data.Status.ToUpper(), $"Deployment request {data.Status.ToLower()}"),
+                bannerHtml: BuildBanner(color, data.Status.ToUpper(), $"Deployment Request {data.Status}"),
                 contentHtml: intro + remarkHtml + BuildDetailsTable(data) + BuildCta("View in TaskFlow"),
                 note: approved
                     ? "You may proceed with the deployment as per your team's release process."
                     : "Please review the manager's remark, make the required changes and raise a fresh request if needed.");
 
+            // CC: every developer & team lead of the requester's team, plus the
+            // deciding manager. To: the requester (removed from CC by EmailService).
+            var cc = await GetTeamRecipientEmailsAsync(data.Requested_By);
+            cc.Add(data.Lead_Email);
+            cc.Add(deciderEmail);
+
             _emailService.SendInBackground(
                 to: new List<string> { data.Requester_Email },
-                cc: new List<string> { data.Lead_Email, deciderEmail },
+                cc: cc,
                 subject: subject,
                 htmlBody: body);
         }
@@ -132,7 +145,7 @@ namespace Taskmanagement_API.Data
         {
             const string query = @"
                 SELECT
-                    r.Request_ID, r.Feature_Module, r.Changes_Description, r.Risk_Challenge,
+                    r.Request_ID, r.Requested_By, r.Feature_Module, r.Changes_Description, r.Risk_Challenge,
                     r.Change_Type, r.Status, r.Manager_Remark, r.Inserted_Date, r.Approved_Date,
                     req.Employee_Name AS Requester_Name,
                     ISNULL(req.Email_Address, '') AS Requester_Email,
@@ -164,6 +177,7 @@ namespace Taskmanagement_API.Data
             return new RequestMailData
             {
                 Request_ID = reader.GetDecimal("Request_ID"),
+                Requested_By = reader.GetDecimal("Requested_By"),
                 Feature_Module = reader.GetString("Feature_Module"),
                 Changes_Description = reader.GetString("Changes_Description"),
                 Risk_Challenge = reader.IsDBNull("Risk_Challenge") ? null : reader.GetString("Risk_Challenge"),
@@ -182,6 +196,40 @@ namespace Taskmanagement_API.Data
                 Decider_Name = reader.GetString("Decider_Name"),
                 Decider_Email = reader.GetString("Decider_Email"),
             };
+        }
+
+        // All developers and team leads (designation 2 & 3) that share a team with
+        // the requester, via MM_Employee_Team. Managers are intentionally excluded
+        // so only the routed/approving manager (added separately) ever gets a mail.
+        private async Task<List<string>> GetTeamRecipientEmailsAsync(decimal requesterId)
+        {
+            var emails = new List<string>();
+
+            const string query = @"
+                SELECT DISTINCT ISNULL(e.Email_Address, '') AS Email
+                FROM MM_Employee_Team et1
+                INNER JOIN MM_Employee_Team et2 ON et2.Team_ID = et1.Team_ID
+                INNER JOIN MM_Employee e ON e.Employee_ID = et2.Employee_ID
+                WHERE et1.Employee_ID = @Requester_ID
+                  AND e.Designation_ID IN (2, 3)
+                  AND (e.Is_Deleted IS NULL OR e.Is_Deleted = 0)
+                  AND e.Email_Address IS NOT NULL AND e.Email_Address <> ''";
+
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@Requester_ID", requesterId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var email = reader.GetString("Email");
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    emails.Add(email);
+                }
+            }
+
+            return emails;
         }
 
         // ── Mail building blocks (inline styles for mail-client compatibility) ─
@@ -282,7 +330,7 @@ namespace Taskmanagement_API.Data
           </tr>
           <tr>
             <td style=""background-color:#f9fafb;padding:16px 32px;border-top:1px solid #f3f4f6;"">
-              <div style=""font-size:12px;font-weight:bold;color:#4b5563;"">TaskFlow &middot; Deployment Approval</div>
+              <div style=""font-size:12px;font-weight:bold;color:#4b5563;"">Drona &middot; Deployment Approval</div>
               <div style=""font-size:11px;color:#9ca3af;margin-top:2px;"">This is an automated notification. Please do not reply to this email.</div>
             </td>
           </tr>

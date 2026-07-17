@@ -4562,11 +4562,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Satish\\Task_Management\\API\\Taskmanagement_API.csproj",
+      "projectUniqueName": "C:\\Satish\\Task_Management\\api\\Taskmanagement_API.csproj",
       "projectName": "Taskmanagement_API",
-      "projectPath": "C:\\Satish\\Task_Management\\API\\Taskmanagement_API.csproj",
+      "projectPath": "C:\\Satish\\Task_Management\\api\\Taskmanagement_API.csproj",
       "packagesPath": "C:\\Users\\satis\\.nuget\\packages\\",
-      "outputPath": "C:\\Satish\\Task_Management\\API\\obj\\",
+      "outputPath": "C:\\Satish\\Task_Management\\api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\satis\\AppData\\Roaming\\NuGet\\NuGet.Config"

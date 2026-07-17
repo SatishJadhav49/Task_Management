@@ -72,12 +72,22 @@ namespace Taskmanagement_API.Data
             var requests = new List<MM_Deployment_ListDto>();
             var normalizedMode = (mode ?? "developer").Trim().ToLowerInvariant();
 
-            string whereClause = normalizedMode switch
-            {
-                "manager" => "r.Approver_Manager_ID = @Employee_ID",
-                "lead" => "(r.Requested_By = @Employee_ID OR req.Team_Lead_ID = @Employee_ID)",
-                _ => "r.Requested_By = @Employee_ID",
-            };
+            // Manager -> requests routed to them for approval.
+            // Everyone else (developer / lead) -> all requests raised by any member
+            // of a team they share (via MM_Employee_Team), so teammates see each
+            // other's requests. Own requests are always included as a fallback for
+            // users who have no team mapping yet.
+            string whereClause = normalizedMode == "manager"
+                ? "r.Approver_Manager_ID = @Employee_ID"
+                : @"(
+                        r.Requested_By = @Employee_ID
+                        OR r.Requested_By IN (
+                            SELECT et2.Employee_ID
+                            FROM MM_Employee_Team et1
+                            INNER JOIN MM_Employee_Team et2 ON et2.Team_ID = et1.Team_ID
+                            WHERE et1.Employee_ID = @Employee_ID
+                        )
+                    )";
 
             string query = $@"
                 SELECT
